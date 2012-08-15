@@ -1,4 +1,4 @@
-require './lib/string_utils'
+require '../lib/string_utils'
 assert = require 'assert'
 
 pluralizeSamples = [
