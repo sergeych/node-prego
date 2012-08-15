@@ -6,13 +6,13 @@ exports.Sync = class Sync
     @finished = false
     @handlers = if done? then [done] else []
 
-  doneCallback: (done) ->
-    @handlers.push done if done
+  doneCallback: (originalDone) ->
     @waitCount++
     @finished = false
     called = false
 
     (err, data) =>
+      originalDone?(err, data)
       return console.log 'Warning: ignored Sync callback called more than once' if called
       called = true
       (@errors ?= []).push(err) if err

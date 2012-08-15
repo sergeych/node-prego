@@ -22,7 +22,7 @@ prego.rollback './tests/migrations', ->
 
       orders = @hasMany(Order)
 
-    Person.deleteAll ->
+    Person.deleteAll sync.doneCallback ->
       console.log '2'
 
       x = new Person { firstName: 'John', lastName: 'Doe' }
@@ -46,6 +46,7 @@ prego.rollback './tests/migrations', ->
               assert.equal o.name, 'things'
               assert.equal o.qty, 1
               assocsDone()
+
 
 
 
