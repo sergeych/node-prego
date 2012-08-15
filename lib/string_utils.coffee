@@ -8,11 +8,23 @@ String::snakeToCamelCase = ->
   parts[1..] = (p.toTitleCase() for p in parts[1..])
   parts.join('')
 
+String::snakeToLowerCamelCase = String::snakeToCamelCase
+
+String::snakeToUpperCamelCase = ->
+  (p.toTitleCase() for p in @split('_')).join('')
+
+
 String::toTitleCase = ->
-  @[0].toUpperCase() + @substring(1).toLowerCase()
+  @[0].toUpperCase() + @[1..].toLowerCase()
 
 String::camelToSnakeCase = ->
   @replace(/(.)([A-Z])/g, '$1_$2').toLowerCase()
+
+String::toLowerCamelCase = ->
+  @[0].toLowerCase() + @[1..]
+
+String::toUpperCamelCase = ->
+  @[0].toUpperCase() + @[1..]
 
 pluralizePatterns = [
   ['(quiz)', '$1zes']

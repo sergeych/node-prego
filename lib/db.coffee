@@ -1,6 +1,11 @@
 pg = require('pg').native
 require './string_utils'
+
 exports.Sync = require('./sync').Sync
+migrations = require('./migrations')
+
+exports.migrate = migrations.migrate
+exports.rollback = migrations.rollback
 
 exports.connectionString = null
 
@@ -117,6 +122,18 @@ exports.Table = class Table
       return done err if err
       done null, if row then new @(row) else null
 
+  @deleteAll = (done) ->
+    executeRow "DELETE FROM #{@getTableName()}", [], done
+
+  @hasMany = (model, params) ->
+    foreignKey = params?.foreignKey || (@name + "Id").camelToSnakeCase()
+    baseSql = "SELECT x.* FROM #{model.getTableName()} x INNER JOIN #{@getTableName()} me ON me.id = #{foreignKey}"
+    @::[model.name.pluralize().toLowerCamelCase()] =
+      all: (params, done) =>
+        sql = baseSql
+        sql += "WHERE #{params.where}" if params.where
+        console.log sql, params
+        model.allFromSql sql, params.values || [], done
 
   constructor: (attributes) ->
     @[key] = value for key, value of attributes

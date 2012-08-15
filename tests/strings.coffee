@@ -45,9 +45,12 @@ for [s, p] in pluralizeSamples
 
 assert.equal 'theColumnName'.camelToSnakeCase(), 'the_column_name'
 assert.equal 'the_column_name'.snakeToCamelCase(), 'theColumnName'
+assert.equal 'the_column_name'.snakeToLowerCamelCase(), 'theColumnName'
+assert.equal 'the_column_name'.snakeToUpperCamelCase(), 'TheColumnName'
 assert.equal 'tiTLe_caSe'.toTitleCase(), 'Title_case'
 
-
+assert.equal 'LowerCamelCase'.toLowerCamelCase(), 'lowerCamelCase'
+assert.equal 'lowerCamelCase'.toUpperCamelCase(), 'LowerCamelCase'
 
 
 
