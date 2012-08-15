@@ -1,6 +1,6 @@
 {
     "name":"prego",
-    "version":"0.0.3",
+    "version":"0.0.4",
     "description":"Callback-style postgres fast minimalistic migratinos + tables. less than orm, more than pg ;)",
     "author":"Sergey Chernov <real.sergeych@gmail.com>",
     "main":"lib/db.coffee",
@@ -9,5 +9,9 @@
     },
     "bin":{
         "pmigrate":"./bin/pmigrate"
+    },
+    "repository":{
+        "type":"git",
+        "url": "https://github.com/sergeych/prego.git"
     }
 }
