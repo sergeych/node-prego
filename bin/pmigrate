@@ -1,0 +1,35 @@
+#!/usr/bin/env coffee
+
+db = require('../lib/db')
+mg = require('../lib/migrations')
+path = require 'path'
+
+#db.connectionString = "postgres://postgres:46nxjuov@localhost:5432/nodeswapper"
+
+if !(migratePath = process.argv[3])
+  migratePath = './migrations'
+
+if !(command = process.argv[2]?.toLowerCase())
+  command = 'up'
+
+
+
+done = (err) ->
+  if err
+    console.log 'Error:', err
+    process.exit 10
+  else
+    process.exit 0
+
+try
+  if command in ['rollback', 'back', 'down']
+    console.log 'Rolling back last migration'
+    mg.rollback migratePath, done
+  else
+    mg.migrate migratePath, done
+catch error
+  if error.message == 'DB connection string is not set'
+#    console.log 'Fatal:', error.message
+  else
+    throw error
+
