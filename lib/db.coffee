@@ -126,7 +126,8 @@ exports.Table = class Table
     executeRow "DELETE FROM #{@getTableName()}", [], done
 
   @hasMany = (model, params) ->
-    foreignKey = params?.foreignKey || (@name + "Id").camelToSnakeCase()
+    foreignField = (params?.foreignKey || (@name + "Id")).toLowerCamelCase()
+    foreignKey = foreignField.camelToSnakeCase()
     baseSql = "SELECT x.* FROM #{model.getTableName()} x INNER JOIN #{@getTableName()} me ON me.id = #{foreignKey}"
     @::[model.name.pluralize().toLowerCamelCase()] =
       all: (params, done) =>
@@ -134,6 +135,11 @@ exports.Table = class Table
         sql += "WHERE #{params.where}" if params.where
         console.log sql, params
         model.allFromSql sql, params.values || [], done
+
+    owner = @
+
+    model.prototype[@name.toLowerCamelCase()] = (done) ->
+      owner.findById @[foreignField], done
 
   constructor: (attributes) ->
     @[key] = value for key, value of attributes

@@ -45,7 +45,12 @@ prego.rollback './tests/migrations', ->
               o = data[0]
               assert.equal o.name, 'things'
               assert.equal o.qty, 1
-              assocsDone()
+              o.person (err,p) ->
+                if err
+                  console.log 'ERR:', err
+                  assert.ok !err
+                assert.equal p.fullName(), 'John Doe'
+                assocsDone()
 
 
 
