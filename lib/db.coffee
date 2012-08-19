@@ -131,10 +131,18 @@ exports.Table = class Table
     baseSql = "SELECT x.* FROM #{model.getTableName()} x INNER JOIN #{@getTableName()} me ON me.id = #{foreignKey}"
     @::[model.name.pluralize().toLowerCamelCase()] =
       all: (params, done) =>
+        [params, done] = [{}, params] if !done
         sql = baseSql
-        sql += "WHERE #{params.where}" if params.where
+        sql += " WHERE #{params.where}" if params.where
         console.log sql, params
         model.allFromSql sql, params.values || [], done
+
+      each: (params, done) =>
+        [params, done] = [ {}, params ] if !done
+        sql = baseSql
+        sql += " WHERE #{params.where}" if params.where
+        console.log sql, params
+        model.eachFromSql sql, params.values || [], done
 
     owner = @
 
