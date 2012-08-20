@@ -32,7 +32,7 @@ prego.rollback './tests/migrations', ->
       x.save ->
         console.log 4
         assert.ok !!x.id
-        Person.findById x.id, (err,y) ->
+        Person.findById x.id, (err, y) ->
           assert.equal y.fullName(), "John Doe"
           tablesDone()
 

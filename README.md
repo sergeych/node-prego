@@ -3,41 +3,45 @@ Prego postgres access module
 
 *ATTENTION*
 
-Prego is under early development. It is published only to extend testing base, it is not yet ready
-for any usage. I'm going to extend the interfaces a long way and may very likely change a bit existing ones.
-And for the same reason there is yet no doces.
+Prego is in beta stage. Some interfaces may be changed and tests are not yet complete. You can expermient and use it
+at your own risk.
 
-Prego is a tiny coffeescript library to simplify Postgres database access and manipulation, built for speed in both
-development and execution, to the extent that first condition allow to meet the second ;)
+Prego is a tiny coffeescript library (thus usable in javascript too) to simplify Postgres database access and
+manipulation, built for speed in both development and execution, to the extent first condition allows ;)
 
 Main prego features:
 
 * Callback-style, fast and easy
 
-* reversible migrations, in plain postgres SQL (well any js/coffee code could be added, too), executed in transactions
-  and reversible if 'down' routine exists.
+* reversible migrations, plain postgres SQL + any js/coffee code, executed in transactions, convenient to deploy
 
-* DB access functions like prego.client(), prego.execute(), prego.executeRow() with automatic SQL statement preparation.
+* DB access helper functions like prego.client(), prego.execute(), prego.executeRow() with automatic SQL statement
+  preparation and caching, and pg's connection pool
   Uses 'pg' connection pool
 
-* prego.query to execute multiline parameterless queries without statement preparing. Uses same connection pool.
+* Models: use prego.Table as base class to get automated loading from SQL or by id, access to attributes as camelCased
+  properties `user.lastName`, save only changed attributes, minimal associations (hasMany), easy deletion and so on.
 
-* Table base class that simplifies basic operation to access tables, like obtaining from SQL or by id (you should
-  provide field to each table you want to use this feature), track and save changes, convert snake_case column names
-  in db to table.camelCase in objects, load series of rows converting to a Model class (that inherits from Table)
-  automatically, either all the returning row or row-by-row in a callback.
+* Some utility classes to perform parallel operations, manipulate strings, etc.
 
-* Some utility classes to perform parallel operations and manipulate strings, etc.
+Conslult online docs for more: https://github.com/sergeych/prego/wiki
+
+Installation
+============
+
+    npm install [-g] prego
+
+Global installation is needed to run `pmigrate` command-line tool.
 
 Configuration
 =============
 
-Currently, prego looks for ./config(.js|.coffee), imports it and looks for @exports.dbConnectionString@ where should
-be a suitable for pg module connection string, such as
+Currently, prego looks for ./config(.js|.coffee), imports it and checks @exports.dbConnectionString@ where should
+be connection string suitable for the pg module, such as
 
     exports.dbConnectionString = "postgres://user:passw@localhost:5432/mydbname"
 
-Config module could do whatever logic you need to caluclate suitable connection string, say, depending on the
+Config module could do whatever logic you need to calculate suitable connection string, say, depending on the
 deployment target, debug mode or whatever you like.
 
 
@@ -153,6 +157,11 @@ or
 Second form is more appropriate. Note that forst form actually limit your project to 10000 migrations as lexical
 comparison may and will give wrong results when 4-digit numbers will be overflowed. Of course you can optimistically
 evade it using 000000000_initial_migration pattern ;)
+
+Associations
+============
+
+Please consult online docs: https://github.com/sergeych/prego/wiki
 
 Sync class
 ==========
