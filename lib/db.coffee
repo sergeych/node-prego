@@ -79,13 +79,19 @@ exports.Table = class Table
 
   @fetchColumns = (done) ->
     if @columns
+      console.log 'rdy'
       done null, @columns
     else
+      if @waitColumns
+        @waitColumns.push done
+        return
+      @waitColumns = [done]
       query "select column_name, data_type from information_schema.columns where table_name='#{@getTableName()}'", (err, rs) =>
         return done(err) if err
         @columns = {}
         @columns[m.column_name] = m.data_type for m in rs.rows
-        done null, @columns
+        [d null, @columns for d in @waitColumns]
+        @waitColumns = undefined
 
   @all = (done) ->
     @allFromSql "SELECT * FROM #{@getTableName()}", done
