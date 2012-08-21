@@ -20,7 +20,7 @@ prego.rollback './tests/migrations', ->
       fullName: ->
         "#{@firstName || ''} #{@lastName || ''}"
 
-      orders = @hasMany(Order)
+      @hasMany(Order)
 
     Person.deleteAll sync.doneCallback ->
       console.log '2'

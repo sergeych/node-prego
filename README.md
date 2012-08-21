@@ -137,7 +137,7 @@ You can easily add one-to-many associations to your models:
     class Order extends prego.Table
 
     class Person extends prego.Table
-        @orders = @hasMany Order
+        @hasMany Order
 
     person.orders.all (err,orders) ->
         return console.log('Cant get orders',err) if err
