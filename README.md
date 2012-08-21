@@ -88,7 +88,7 @@ This will work if you create 'users' table with 'first_name', 'last_name' and 'i
 You can ovveride table name (which defaults to your class name pluralized and snake cased):
 
         class User extends prego.Table
-            @tableName = persons
+            @tableName = 'persons'
 
 When using 'fromSql' functions, you can actually get more columns that table has, using joins and so on. You can then
 access these as object properties just like table columns, but they won't be saved.
@@ -124,42 +124,26 @@ Then, in the project root folder, execute
 
     $ pmigrate
 
-This form attempts to perform all pending migrations and will stop at first error or when there is nothing left to
-migrate (exit status code is 0 only if everything os fine and there is nothing to do). Each migration works in
-separate transaction that commits on success.
-
-To roll back last migrations, use
+To roll back last migration only, use
 
     $ pmigrate back
 
-It will attempt to rollback last migration only. If you need more to revert, call it once again until happy or there
-will be no migrations left.
-
-Migrations are stored in the _migrations table that would be created automatically. Do not change it. Programming
-interface is on the way so it would be possible to check and pass migration in the server startup code, for
-example.
-
-Migration file names
---------------------
-
-Names should be formatted in any way that makest older migration file name be comparable and always smaller in the
-string comparison context than newer migrations. You can easily achieve it using createion date-time or serial
-number as a prefix file name:
-
-    0001_initial_tables.coffee
-    0002_add_some_mode_indexes.coffee
-
-or
-
-    20120501T180001_creating_tables.coffee
-    20120517T221010_add_customers_table.coffee
-
-Second form is more appropriate. Note that forst form actually limit your project to 10000 migrations as lexical
-comparison may and will give wrong results when 4-digit numbers will be overflowed. Of course you can optimistically
-evade it using 000000000_initial_migration pattern ;)
+Consult online docs for more: https://github.com/sergeych/prego/wiki/Migrations
 
 Associations
 ============
+
+You can easily add one-to-many associations to your models:
+
+    class Order extends prego.Table
+
+    class Person extends prego.Table
+        @orders = @hasMany Order
+
+    person.orders.all (err,orders) ->
+        return console.log('Cant get orders',err) if err
+        return console.log('there is no orders') if orders.lebgth == 0
+        console.log 'First order qty:', orders[0].qty
 
 Please consult online docs: https://github.com/sergeych/prego/wiki
 
