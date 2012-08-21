@@ -1,7 +1,7 @@
 {
     "name":"prego",
-    "version":"0.1.2",
-    "description":"Callback-style postgres fast minimalistic migratinos + tables. less than orm, more than pg ;)",
+    "version":"0.1.3",
+    "description":"Callback-style node.js+postgres fast migrations, tables and simple associations.",
     "author":"Sergey Chernov <real.sergeych@gmail.com>",
     "main":"lib/db.coffee",
     "dependencies":{

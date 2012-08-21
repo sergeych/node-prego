@@ -9,6 +9,10 @@ exports.rollback = migrations.rollback
 
 exports.connectionString = null
 
+exports.enableSqlLog = enableLog = (enable) ->
+  sqlLog = if enable then (args...) -> console.log 'SQL:', args... else null
+
+
 sqlLog = null
 
 statementCounter = 0
@@ -132,28 +136,57 @@ exports.Table = class Table
     executeRow "DELETE FROM #{@getTableName()}", [], done
 
   @hasMany = (model, params) ->
+    poly = params?.as
     foreignField = (params?.foreignKey || (@name + "Id")).toLowerCamelCase()
     foreignKey = foreignField.camelToSnakeCase()
-    baseSql = "SELECT x.* FROM #{model.getTableName()} x INNER JOIN #{@getTableName()} me ON me.id = #{foreignKey}"
-    @::[model.name.pluralize().toLowerCamelCase()] =
-      all: (params, done) =>
-        [params, done] = [{}, params] if !done
-        sql = baseSql
-        sql += " WHERE #{params.where}" if params.where
-        console.log sql, params
-        model.allFromSql sql, params.values || [], done
+    if poly
+      polyId = "#{poly}_id"
+      polyType = "#{poly}_type"
+      baseSql = "SELECT x.* FROM #{model.getTableName()} x WHERE #{polyId} = $1 AND x.#{polyType}='#{@getTableName()}'"
+      polyId = polyId.snakeToCamelCase()
+      polyType = polyType.snakeToCamelCase()
+    else
+      baseSql = "SELECT x.* FROM #{model.getTableName()} x WHERE #{foreignKey} = $1"
 
-      each: (params, done) =>
-        [params, done] = [ {}, params ] if !done
-        sql = baseSql
-        sql += " WHERE #{params.where}" if params.where
-        console.log sql, params
-        model.eachFromSql sql, params.values || [], done
+    modelTable = model.getTableName()
 
-    owner = @
+    @::[modelTable + '_all'] = (params, done) ->
+      [params, done] = [ {}, params ] if !done
+      sql = baseSql
+      sql += " AND #{params.where}" if params.where
+      vals = params.values || []
+      vals.unshift @id
+      model.allFromSql sql, vals, done
 
-    model.prototype[@name.toLowerCamelCase()] = (done) ->
-      owner.findById @[foreignField], done
+    @::[modelTable + '_each'] = (params, done) ->
+      [params, done] = [ {}, params ] if !done
+      sql = baseSql
+      sql += " AND #{params.where}" if params.where
+      vals = params.values || []
+      vals.unshift @id
+      model.eachFromSql sql, vals, done
+
+    @::[modelTable + '_build'] = build = (params) ->
+      if poly
+        params[polyId] = @id
+        params[polyType] = @constructor.getTableName()
+      else
+        params[foreignKey] = @id
+      new model(params)
+
+    @::[modelTable + '_create'] = (params, done) ->
+      build.call(@,params).save(done)
+
+    if poly
+      model._knownTypes ||= {}
+      model._knownTypes[@getTableName()] = @
+      model::[@name.toLowerCamelCase()] = (done) ->
+        obj = @constructor._knownTypes[@[polyType]]
+        obj.findById @[polyId], done
+    else
+      owner = @
+      model::[@name.toLowerCamelCase()] = (done) ->
+        owner.findById @[foreignField], done
 
   constructor: (attributes) ->
     @[key] = value for key, value of attributes
@@ -194,7 +227,6 @@ exports.Table = class Table
       return done?(err) if err
       return done?(null,null) if !changes
       sqlLog? changes
-      console.log 1
       values = []
       parts = []
       cnt = 1
@@ -218,9 +250,6 @@ exports.Table = class Table
             @_loaded = loaded
           done? err, @
 
-
-exports.enableSqlLog = (enable) ->
-  sqlLog = if enable then (args...) -> console.log 'SQL:', args... else null
 
 
 # ------------------------------------------------- Configuration

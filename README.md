@@ -139,10 +139,13 @@ You can easily add one-to-many associations to your models:
     class Person extends prego.Table
         @hasMany Order
 
-    person.orders.all (err,orders) ->
+    person.orders_all (err,orders) ->
         return console.log('Cant get orders',err) if err
-        return console.log('there is no orders') if orders.lebgth == 0
+        return console.log('there is no orders') if orders.length == 0
         console.log 'First order qty:', orders[0].qty
+
+You can also polymorphic associations as well (AR-style). Polymorphic asociation stores not only target object id,
+but also target table name and restores proper model object (under construction).
 
 Please consult online docs: https://github.com/sergeych/prego/wiki
 
