@@ -1,12 +1,10 @@
-Prego postgres access module
-============================
+Prego postgres access module for Node.js
+========================================
 
-*ATTENTION*
+*Prego* is currently in a beta stage. Some interfaces may be changed and tests are not yet complete. You can expermient
+and use it at your own risk. Prego it is in rapid development being a part of several projects in progress.
 
-Prego is in beta stage. Some interfaces may be changed and tests are not yet complete. You can expermient and use it
-at your own risk.
-
-Prego is a tiny coffeescript library (thus usable in javascript too) to simplify Postgres database access and
+Prego is a tiny coffeescript library (usable with javascript too) to simplify Postgres database access and
 manipulation, built for speed in both development and execution, to the extent first condition allows ;)
 
 Main prego features:
@@ -44,12 +42,13 @@ be connection string suitable for the pg module, such as
 Config module could do whatever logic you need to calculate suitable connection string, say, depending on the
 deployment target, debug mode or whatever you like.
 
+Read more: https://github.com/sergeych/prego/wiki/Installation
 
 Table class
 ===========
 
-Use it as a base class for your models. Have 'id' column as serial primary key. It may not work very well wiythout it
-yet, but I'll fix it later. For example:
+Use it as a base class for your models. The great isea is to have integer (serial for example) 'id' column as primary
+key. It may not work very well without it yet. For example:
 
         prego = require 'prego'
 
