@@ -12,6 +12,8 @@ tablesDone = sync.doneCallback()
 assocsDone = sync.doneCallback()
 polyAssocsDone = sync.doneCallback()
 
+#prego.enableSqlLog true
+
 prego.rollback './tests/migrations', ->
   prego.migrate './tests/migrations', ->
 
@@ -88,6 +90,11 @@ prego.rollback './tests/migrations', ->
               assert.equal err, null
               assert.equal 1, ary.length
               console.log 'All/Query 2 passed'
+
+            prego.executeRow 'select count(*) from persons', [], sync.doneCallback (err,data) ->
+              assert.equal err, null
+              console.log data
+              assert.equal data.count, 2
 
             doneEach = sync.doneCallback()
             data = []

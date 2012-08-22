@@ -9,11 +9,10 @@ exports.rollback = migrations.rollback
 
 exports.connectionString = null
 
-exports.enableSqlLog = enableLog = (enable) ->
-  sqlLog = if enable then (args...) -> console.log 'SQL:', args... else null
-
-
 sqlLog = null
+
+exports.enableSqlLog = enableLog = (enable) ->
+  sqlLog = if enable then (args...) -> console.log('SQL:', args...) else null
 
 statementCounter = 0
 statementNames = {}
