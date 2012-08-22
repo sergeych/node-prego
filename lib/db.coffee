@@ -180,7 +180,7 @@ exports.Table = class Table
     if poly
       model._knownTypes ||= {}
       model._knownTypes[@getTableName()] = @
-      model::[@name.toLowerCamelCase()] = (done) ->
+      model::[poly] = (done) ->
         obj = @constructor._knownTypes[@[polyType]]
         obj.findById @[polyId], done
     else

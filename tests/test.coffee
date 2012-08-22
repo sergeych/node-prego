@@ -28,8 +28,6 @@ prego.rollback './tests/migrations', ->
       @hasMany Comment, {as: 'commentable'}
 
     Person.deleteAll sync.doneCallback (err) ->
-      console.log 'ERR/D', err
-      console.log '2'
 
       s2 = new prego.Sync
 
@@ -37,13 +35,11 @@ prego.rollback './tests/migrations', ->
       x1 = new Person { firstName: 'Jane', lastName: 'Doe' }
 
       assert.ok !x.id
-      console.log '3'
 
       x.save s2.doneCallback()
       x1.save s2.doneCallback()
 
       s2.wait ->
-        console.log 4
         assert.ok !!x.id
         assert.ok !!x1.id
         Person.findById x.id, (err, y) ->
@@ -55,7 +51,7 @@ prego.rollback './tests/migrations', ->
             assert.equal err, null
             assert.equal comments[0].text, 'Hello comment!'
             com = comments[0]
-            com.person (err, p) ->
+            com.commentable (err, p) ->
               assert.equal err, null
               assert.equal p.fullName(), 'John Doe'
               polyAssocsDone()
@@ -64,7 +60,6 @@ prego.rollback './tests/migrations', ->
             assert.deepEqual comments, []
 
         x.orders_all (err, data) ->
-          console.log 'E', err, 'D', data
           assert.equal data.length, 0
           new Order({name: 'things', qty: 1,personId: x.id}).save (err) ->
             assert.equal err, null
@@ -76,8 +71,7 @@ prego.rollback './tests/migrations', ->
               assert.equal o.qty, 1
               o.person (err,p) ->
                 if err
-                  console.log 'ERR:', err
-                  assert.ok !err
+                  assert.equal err, null
                 assert.equal p.fullName(), 'John Doe'
                 assocsDone()
 

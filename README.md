@@ -4,7 +4,7 @@ Prego postgres access module for Node.js
 *Prego* is currently in a beta stage. Some interfaces may be changed and tests are not yet complete. You can expermient
 and use it at your own risk. Prego it is in rapid development being a part of several projects in progress.
 
-Prego is a tiny coffeescript library (usable with javascript too) to simplify Postgres database access and
+Prego is a tiny coffeescript library (usable with javascript too) that simplifies Postgres database access and
 manipulation, built for speed in both development and execution, to the extent first condition allows ;)
 
 Main prego features:
@@ -19,6 +19,8 @@ Main prego features:
 
 * Models: use prego.Table as base class to get automated loading from SQL or by id, access to attributes as camelCased
   properties `user.lastName`, save only changed attributes, minimal associations (hasMany), easy deletion and so on.
+
+* Callback-style associations and polymorphic associations
 
 * Some utility classes to perform parallel operations, manipulate strings, etc.
 
