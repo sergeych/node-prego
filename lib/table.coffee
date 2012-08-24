@@ -6,6 +6,11 @@ exports.Table = class Table
     if !@tableName
       @tableName = @name.pluralize().camelToSnakeCase();
     @tableName
+    
+  @getConnection = ->
+    if !@connection
+      @connection = db.db
+    @connection
 
   @fetchColumns = (done) ->
     if @columns
@@ -16,7 +21,7 @@ exports.Table = class Table
         @waitColumns.push done
         return
       @waitColumns = [done]
-      @_co.query "select column_name, data_type from information_schema.columns where table_name='#{@getTableName()}'", (err, rs) =>
+      @getConnection().query "select column_name, data_type from information_schema.columns where table_name='#{@getTableName()}'", (err, rs) =>
         return done(err) if err
         @columns = {}
         @columns[m.column_name] = m.data_type for m in rs.rows
@@ -31,7 +36,7 @@ exports.Table = class Table
 
   @allFromSql = (statement, values, done) ->
     [done, values] = [values, []] unless done?
-    @_co.execute statement, values, (err, rs) =>
+    @getConnection().execute statement, values, (err, rs) =>
       if err
         done err
       else
@@ -39,13 +44,13 @@ exports.Table = class Table
 
   @eachFromSql = (statement, values, done) ->
     [values, done] = [ [], values] if !done
-    query = @_co.executeEach statement, values, (err, row) =>
+    query = @getConnection().executeEach statement, values, (err, row) =>
       return done(err) if err
       done null, if row then new @().loadRow(row) else null
 
   @findById = (id, done) ->
     @_findByIdClause ?= "SELECT #{@getTableName()}.* FROM #{@getTableName()} WHERE id=$1 LIMIT 1"
-    @_co.executeRow @_findByIdClause, [id], (err, row) =>
+    @getConnection().executeRow @_findByIdClause, [id], (err, row) =>
       if err
         done err, null
       else
@@ -54,12 +59,12 @@ exports.Table = class Table
   @findBySql = (statement, values, done) ->
     [done, values] = [values, []] unless done?
     statement += ' limit 1' if !statement.match /LIMIT 1/i
-    @_co.executeRow statement, values, (err, row) =>
+    @getConnection().executeRow statement, values, (err, row) =>
       return done err if err
       done null, if row then new @(row) else null
 
   @deleteAll = (done) ->
-    @_co.executeRow "DELETE FROM #{@getTableName()}", [], done
+    @getConnection().executeRow "DELETE FROM #{@getTableName()}", [], done
 
   @hasMany = (model, params) ->
     poly = params?.as
@@ -115,7 +120,6 @@ exports.Table = class Table
         owner.findById @[foreignField], done
 
   constructor: (attributes) ->
-    console.log '!!!!!!!!!!'
     @[key] = value for key, value of attributes
     @_loaded = {}
 
@@ -128,7 +132,7 @@ exports.Table = class Table
 
   delete: (done) ->
     throw Error("Can't delete record that is not saved/has no id") if !@id
-    @_co.execute "DELETE FROM #{@constructor.tableName} WHERE id=$1", [@id], done
+    @constructor.getConnection().execute "DELETE FROM #{@constructor.tableName} WHERE id=$1", [@id], done
 
   ## Changes: caluclate db field that has been changed
   #
@@ -149,7 +153,8 @@ exports.Table = class Table
           count++
       done null, if count > 0 then changes else null
 
-  save: (done) ->
+  save: (_done) ->
+    done = if @_transaction then  @_transaction.check(_done) else _done
     @changes (err, changes) =>
       return done?(err) if err
       return done?(null,null) if !changes
@@ -162,7 +167,7 @@ exports.Table = class Table
           values.push value[1]
         values.push @id
         clause = "UPDATE #{@constructor.tableName} SET #{parts.join ' '} WHERE id=$#{cnt}"
-        @_co.executeRow clause, values, done
+        @constructor.getConnection().executeRow clause, values, done
       else
         loaded = {}
         for key, value of changes
@@ -170,7 +175,7 @@ exports.Table = class Table
           values.push value[1]
           loaded[key] = value
         clause = "INSERT INTO #{@constructor.tableName}(#{parts.join ','}) values(#{ ("$#{n}" for n in [1..parts.length]) }) RETURNING id"
-        @_co.executeRow clause, values, (err, row) =>
+        @constructor.getConnection().executeRow clause, values, (err, row) =>
           unless err
             @id = loaded.id = row.id
             @_loaded = loaded

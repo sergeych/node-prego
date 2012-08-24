@@ -1,10 +1,7 @@
 assert = require 'assert'
 
-require './strings.coffee'
-
 prego = require '../lib/main'
 
-prego.setConnectionString("postgres://localhost:5432/prego_test")
 
 sync = new prego.Sync
 
@@ -12,7 +9,9 @@ tablesDone = sync.doneCallback()
 assocsDone = sync.doneCallback()
 polyAssocsDone = sync.doneCallback()
 
-#prego.enableSqlLog true
+prego.enableSqlLog true
+
+prego.setConnectionString("postgres://localhost:5432/prego_test")
 
 prego.rollback './tests/migrations', ->
   prego.migrate './tests/migrations', ->
@@ -38,8 +37,12 @@ prego.rollback './tests/migrations', ->
 
       assert.ok !x.id
 
-      x.save s2.doneCallback()
-      x1.save s2.doneCallback()
+      prego.transaction x, (err, t)->
+        assert.equal err, null
+        x.save s2.doneCallback()
+        t.attach x1
+        x1.save s2.doneCallback()
+        t.close()
 
       s2.wait ->
         assert.ok !!x.id
@@ -91,7 +94,7 @@ prego.rollback './tests/migrations', ->
               assert.equal 1, ary.length
               console.log 'All/Query 2 passed'
 
-            prego.executeRow 'select count(*) from persons', [], sync.doneCallback (err,data) ->
+            prego.db.executeRow 'select count(*) from persons', [], sync.doneCallback (err,data) ->
               assert.equal err, null
               console.log data
               assert.equal data.count, 2

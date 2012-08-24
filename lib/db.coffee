@@ -22,24 +22,29 @@ statementName = (statement) ->
 
 class Connection
 
-  constructor: ->
+  constructor: (@connectionString) ->
+
+  clone: ->
+    return new @.constructor(@connectionString)
 
   client: (callback) ->
 
     return callback(null, @_client) if @_client
 
-    if exports.connectionString
+    @connectionString ?= exports.connectionString
+    unless @connectionString
       # Check config.coffee or config.js
+      console.log 'ch1'
       if fs.existsSync('./config.coffee') || fs.existsSync('./config.js')
         console.log 'Loading from config module'
         m = require path.resolve('./config')
         s = m.dbConnection || m.dbConnectionString
         console.log 'Connection string detected:', s
-        exports.connectionString = s
+        @connectionString = exports.connectionString = s
       if !exports.connectionString
         throw Error('DB connection string is not found/not set')
 
-    pg.connect exports.connectionString, (err, client) =>
+    pg.connect @connectionString, (err, client) =>
       if err
         console.log 'Unable to get PG client for', exports.connectionString
         console.log ': ', err
@@ -48,6 +53,12 @@ class Connection
         @_client = client
         console.log 'Connection created:', exports.connectionString
         callback null, client
+
+  pauseDrain: ->
+    @_client.pauseDrain()
+
+  resumeDrain: ->
+    @_client.resumeDrain()
 
   query: (statement, callback) ->
     sqlLog? statement
