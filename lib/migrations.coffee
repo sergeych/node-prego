@@ -2,7 +2,7 @@
 # Rails-like 2 way migrations. Use CLI 'pmigrate {upd|down}' to perform all pending migrations
 # or roll back most recent
 #
-db = require './db'
+db = new require('./db').db
 fs = require 'fs'
 path = require 'path'
 

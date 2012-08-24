@@ -2,9 +2,9 @@ assert = require 'assert'
 
 require './strings.coffee'
 
-prego = require '../lib/db'
+prego = require '../lib/main'
 
-prego.connectionString = "postgres://localhost:5432/prego_test"
+prego.setConnectionString("postgres://localhost:5432/prego_test")
 
 sync = new prego.Sync
 
