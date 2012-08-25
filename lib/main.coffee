@@ -17,3 +17,19 @@ exports.setConnectionString = (str) ->
 
 exports.enableSqlLog = (show) ->
   db.enableSqlLog show
+
+
+exports.client = (args...) ->
+  db.db.client(args...)
+
+exports.query = (args...) ->
+  db.db.query(args...)
+
+exports.execute = (args...) ->
+  db.db.execute(args...)
+
+exports.executeRow = (args...) ->
+  db.db.executeRow(args...)
+
+exports.executeEach  = (args...) ->
+  db.db.executeEach(args...)

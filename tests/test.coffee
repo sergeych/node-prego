@@ -109,6 +109,11 @@ prego.rollback './tests/migrations', ->
               console.log data
               assert.equal data.count, 2
 
+            prego.executeRow 'select count(*) from persons', [], sync.doneCallback (err,data) ->
+              assert.equal err, null
+              console.log data
+              assert.equal data.count, 2
+
             doneEach = sync.doneCallback()
             data = []
             x.orders_each (err, x) ->
