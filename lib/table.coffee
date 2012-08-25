@@ -154,7 +154,13 @@ exports.Table = class Table
       done null, if count > 0 then changes else null
 
   save: (_done) ->
-    done = if @_transaction then  @_transaction.check(_done) else _done
+    if @_transaction
+      conn = @_transaction.connection
+      done = @_transaction.check(_done)
+    else
+      conn = @constructor.getConnection()
+      done = _done
+
     @changes (err, changes) =>
       return done?(err) if err
       return done?(null,null) if !changes
@@ -167,7 +173,7 @@ exports.Table = class Table
           values.push value[1]
         values.push @id
         clause = "UPDATE #{@constructor.tableName} SET #{parts.join ' '} WHERE id=$#{cnt}"
-        @constructor.getConnection().executeRow clause, values, done
+        conn.executeRow clause, values, done
       else
         loaded = {}
         for key, value of changes
@@ -175,7 +181,7 @@ exports.Table = class Table
           values.push value[1]
           loaded[key] = value
         clause = "INSERT INTO #{@constructor.tableName}(#{parts.join ','}) values(#{ ("$#{n}" for n in [1..parts.length]) }) RETURNING id"
-        @constructor.getConnection().executeRow clause, values, (err, row) =>
+        conn.executeRow clause, values, (err, row) =>
           unless err
             @id = loaded.id = row.id
             @_loaded = loaded

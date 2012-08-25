@@ -3,7 +3,7 @@
     "version":"0.2.0",
     "description":"Callback-style node.js+postgres fast migrations, tables and simple associations.",
     "author":"Sergey Chernov <real.sergeych@gmail.com>",
-    "main":"lib/db.coffee",
+    "main":"lib/main.coffee",
     "dependencies":{
         "pg" : ">= 0.8.x", "coffee-script" : ">= 1.3"
     },

@@ -24,7 +24,7 @@ class Transaction
       @connection = new db.Connection(arg)
     else
       console.log 'Cloning default'
-      @connection = new db.Connection()
+      @connection = db.db.clone()
 
     @open = true
     @connection.query 'BEGIN', @sync.doneCallback (err) =>
@@ -64,12 +64,13 @@ class Transaction
     @connection.resumeDrain()
 
   check: (callback) ->
+    console.log 'CHECKKKK', callback
     @sync.doneCallback (err, args...) =>
       if err
         @rollback (err1) =>
-          callback err
+          callback? err
       else
-        callback null, args...
+        callback? null, args...
 
   close: (done) ->
     @sync.wait (errs) =>
@@ -77,6 +78,7 @@ class Transaction
         @_rollback errs, done
       else
         @_commit errs, done
+      done errs
 
 
 exports.transaction = (arg, done) ->

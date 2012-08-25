@@ -39,14 +39,23 @@ prego.rollback './tests/migrations', ->
 
       prego.transaction x, (err, t)->
         assert.equal err, null
-        x.save s2.doneCallback()
+        x.save()
         t.attach x1
-        x1.save s2.doneCallback()
-        t.close()
+        x1.save()
+        t.commit s2.doneCallback()
 
       s2.wait ->
-        assert.ok !!x.id
-        assert.ok !!x1.id
+        assert.ok !!x.id, "SAVE1"
+        assert.ok !!x1.id, "SAVE2"
+
+        prego.transaction (err, tr) ->
+          assert.equal err, null
+          tr.connection.executeRow 'SELECT sum(id) FROM persons', [], (err,res) ->
+            assert.equal err, null
+            console.log "\n\nSUM!", res.sum
+            console.log "\n\n"
+
+
         Person.findById x.id, (err, y) ->
           assert.equal y.fullName(), "John Doe"
           tablesDone()
@@ -111,6 +120,9 @@ prego.rollback './tests/migrations', ->
                 assert.equal data.length, 1
                 console.log 'Each passed'
                 doneEach()
+
+
+
 
 
 
