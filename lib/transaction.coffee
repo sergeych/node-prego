@@ -2,20 +2,29 @@ db = require './db'
 Table = require('./table').Table
 Sync = require('./sync').Sync
 
-exports.Transaction = class Transaction
+class Transaction
 
   constructor: ->
     @sync = new Sync
     @tables = []
+    @open = false
 
   begin: (arg, done) ->
+    @open = true
     if arg instanceof Table
+      console.log 'Transaction for table!'
       @connection = arg.constructor.getConnection().clone()
       arg.constructor.connection = @connection
       arg._transaction = @
-    else
+    else if arg instanceof db.Connection
+      console.log 'Transaction for connection!'
       @connection = arg
-      @connection = db.connection.clone() unless @connection instanceof db.Connection
+    else if arg?
+      console.log 'Transaction for connstr'
+      @connection = new db.Connection(arg)
+    else
+      console.log 'Cloning default'
+      @connection = new db.Connection()
 
     @open = true
     @connection.query 'BEGIN', @sync.doneCallback (err) =>
@@ -24,6 +33,7 @@ exports.Transaction = class Transaction
       done null, @
 
   attach: (table) ->
+    throw Error('transaction is closed/not started') unless @open
     table.constructor.connection = @connection
     table._transaction = @
 
@@ -33,7 +43,6 @@ exports.Transaction = class Transaction
 
   _commit: (done) ->
     return unless @open
-    @open = false
     @failed = false
     @connection.query 'COMMIT', done
     @_cleanup()
@@ -44,13 +53,13 @@ exports.Transaction = class Transaction
 
   _rollback: (done) ->
     return unless @open
-    @open = false
     @failed = true
     @connection.query 'ROLLBACK', done
     @_cleanup()
 
 
   _cleanup: ->
+    @open = false
     t._transaction = null for t in @tables
     @connection.resumeDrain()
 

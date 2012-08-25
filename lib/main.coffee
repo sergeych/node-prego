@@ -3,6 +3,7 @@ migr = require './migrations'
 table = require './table'
 
 exports.db = db.db
+exports.Connection = db.Connection
 
 exports.migrate = migr.migrate
 exports.rollback = migr.rollback
