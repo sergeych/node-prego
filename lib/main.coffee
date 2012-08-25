@@ -18,7 +18,6 @@ exports.setConnectionString = (str) ->
 exports.enableSqlLog = (show) ->
   db.enableSqlLog show
 
-
 exports.client = (args...) ->
   db.db.client(args...)
 

@@ -63,7 +63,7 @@ key. It may not work very well without it yet. For example:
         User.findById 1, (err, me) ->
             console.log me.fullName();
             me.accessCounter++
-            me.save # only access_counter will be saved here
+            me.save() # only access_counter will be saved here
 
         User.allFromSql "select * from users where first_name ilike 'Jh%' limit 20", (err, users)
             console.log "5th user from array", users[5].lastName
