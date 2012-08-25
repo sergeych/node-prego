@@ -24,7 +24,7 @@ Main prego features:
 
 * Some utility classes to perform parallel operations, manipulate strings, etc.
 
-Conslult online docs for more: https://github.com/sergeych/prego/wiki
+Conslult online docs for more: https://github.com/sergeych/node-prego/wiki
 
 Installation
 ============
@@ -44,7 +44,7 @@ be connection string suitable for the pg module, such as
 Config module could do whatever logic you need to calculate suitable connection string, say, depending on the
 deployment target, debug mode or whatever you like.
 
-Read more: https://github.com/sergeych/prego/wiki/Installation
+Read more: https://github.com/sergeych/node-prego/wiki/Installation
 
 Table class
 ===========
@@ -129,7 +129,7 @@ To roll back last migration only, use
 
     $ pmigrate back
 
-Consult online docs for more: https://github.com/sergeych/prego/wiki/Migrations
+Consult online docs for more: https://github.com/sergeych/node-prego/wiki/Migrations
 
 Associations
 ============
@@ -149,7 +149,7 @@ You can easily add one-to-many associations to your models:
 You can also polymorphic associations as well (AR-style). Polymorphic asociation stores not only target object id,
 but also target table name and restores proper model object (under construction).
 
-Please consult online docs: https://github.com/sergeych/prego/wiki
+Please consult online docs: https://github.com/sergeych/node-prego/wiki
 
 Sync class
 ==========
@@ -191,7 +191,7 @@ to happen.
 String utilities
 ================
 
-Ones used to convert column and table names.
+Ones used to convert column and table names. These are imported automatically by requiring prego.
 
         "snake_case_name".snakeToCamelCase() == 'snakeCaseName'
 

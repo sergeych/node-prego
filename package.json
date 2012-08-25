@@ -1,6 +1,6 @@
 {
     "name":"prego",
-    "version":"0.1.5",
+    "version":"0.2.0",
     "description":"Callback-style node.js+postgres fast migrations, tables and simple associations.",
     "author":"Sergey Chernov <real.sergeych@gmail.com>",
     "main":"lib/db.coffee",
@@ -15,6 +15,6 @@
     },
     "repository":{
         "type":"git",
-        "url": "https://github.com/sergeych/prego.git"
+        "url": "https://github.com/sergeych/node-prego.git"
     }
 }
