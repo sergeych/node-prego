@@ -64,7 +64,6 @@ class Transaction
     @connection.resumeDrain()
 
   check: (callback) ->
-    console.log 'CHECKKKK', callback
     @sync.doneCallback (err, args...) =>
       if err
         @rollback (err1) =>

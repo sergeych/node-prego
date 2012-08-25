@@ -50,10 +50,11 @@ prego.rollback './tests/migrations', ->
 
         prego.transaction (err, tr) ->
           assert.equal err, null
-          tr.connection.executeRow 'SELECT sum(id) FROM persons', [], (err,res) ->
+          tr.connection.executeRow 'SELECT sum(id) FROM persons', [], tr.check (err,res) ->
             assert.equal err, null
             console.log "\n\nSUM!", res.sum
             console.log "\n\n"
+            tr.rollback
 
 
         Person.findById x.id, (err, y) ->
