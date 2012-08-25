@@ -1,7 +1,7 @@
 Prego postgres access module for Node.js
 ========================================
 
-*Prego* is currently in a beta stage. Some interfaces may be changed and tests are not yet complete. You can expermient
+*Prego* is currently in a beta stage. Some interfaces may be changed and tests are not yet complete. You can experiment
 and use it at your own risk. Prego it is in rapid development being a part of several projects in progress.
 
 Prego is a tiny coffeescript library (usable with javascript too) that simplifies Postgres database access and
@@ -24,7 +24,7 @@ Main prego features:
 
 * Some utility classes to perform parallel operations, manipulate strings, etc.
 
-Conslult online docs for more: https://github.com/sergeych/node-prego/wiki
+Consult online docs for more: https://github.com/sergeych/node-prego/wiki
 
 Installation
 ============
