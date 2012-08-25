@@ -22,6 +22,8 @@ Main prego features:
 
 * Callback-style associations and polymorphic associations
 
+* Callback-based transactions, integrated with models.
+
 * Some utility classes to perform parallel operations, manipulate strings, etc.
 
 Consult online docs for more: https://github.com/sergeych/node-prego/wiki
