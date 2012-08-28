@@ -58,10 +58,11 @@ exports.Table = class Table
 
   @findBySql = (statement, values, done) ->
     [done, values] = [values, []] unless done?
+    statement = "SELECT * FROM #{@getTableName()} WHERE #{statement}" unless statement.match /^select/i
     statement += ' limit 1' if !statement.match /LIMIT 1/i
     @getConnection().executeRow statement, values, (err, row) =>
       return done err if err
-      done null, if row then new @(row) else null
+      done null, if row then new @().loadRow(row) else null
 
   @deleteAll = (done) ->
     @getConnection().executeRow "DELETE FROM #{@getTableName()}", [], done

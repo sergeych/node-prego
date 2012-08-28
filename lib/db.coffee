@@ -1,4 +1,4 @@
-pg = require('pg').native
+pg = require('pg')
 fs = require 'fs'
 path = require 'path'
 
@@ -29,14 +29,10 @@ class Connection
 
   client: (callback) ->
 
-    return callback(null, @_client) if @_client
-
     @connectionString ?= exports.connectionString
     unless @connectionString
       # Check config.coffee or config.js
-      console.log 'ch1'
       if fs.existsSync('./config.coffee') || fs.existsSync('./config.js')
-        console.log 'Loading from config module'
         m = require path.resolve('./config')
         s = m.dbConnection || m.dbConnectionString
         console.log 'Connection string detected:', s
@@ -51,7 +47,7 @@ class Connection
         callback err
       else
         @_client = client
-        console.log 'Connection created:', exports.connectionString
+#        console.log 'Connection created:', exports.connectionString
         callback null, client
 
   pauseDrain: ->
