@@ -36,6 +36,7 @@ exports.Table = class Table
 
   @allFromSql = (statement, values, done) ->
     [done, values] = [values, []] unless done?
+    statement = "SELECT * FROM #{@getTableName()} WHERE #{statement}" unless statement.match /^select/i
     @getConnection().execute statement, values, (err, rs) =>
       if err
         done err
@@ -44,6 +45,7 @@ exports.Table = class Table
 
   @eachFromSql = (statement, values, done) ->
     [values, done] = [ [], values] if !done
+    statement = "SELECT * FROM #{@getTableName()} WHERE #{statement}" unless statement.match /^select/i
     query = @getConnection().executeEach statement, values, (err, row) =>
       return done(err) if err
       done null, if row then new @().loadRow(row) else null

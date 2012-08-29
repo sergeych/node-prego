@@ -11,6 +11,7 @@ exports.rollback = migr.rollback
 exports.transaction = require('./transaction').transaction
 exports.Table = require('./table').Table
 exports.Sync = require('./sync').Sync
+exports.Set = require('./set').Set
 
 exports.setConnectionString = (str) ->
   db.connectionString = str
