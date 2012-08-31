@@ -25,6 +25,11 @@ try
   if command in ['rollback', 'back', 'down']
     console.log 'Rolling back last migration'
     mg.rollback migratePath, done
+  else if command in ['redo', 'repeat']
+    console.log 'Performing refo (rollback last + migrate all)'
+    mg.rollback migratePath, (err) ->
+      return done err if err
+      mg.migrate migratePath, done
   else
     mg.migrate migratePath, done
 catch error

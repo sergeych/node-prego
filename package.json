@@ -1,6 +1,6 @@
 {
     "name":"prego",
-    "version":"0.2.5",
+    "version":"0.2.6",
     "description":"Callback-style node.js+postgres fast migrations, tables and simple associations.",
     "author":"Sergey Chernov <real.sergeych@gmail.com>",
     "keywords": ["postgres", "model", "transaction", "migration", "association"],
