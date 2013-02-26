@@ -1,7 +1,6 @@
 db = require './db'
 
 exports.Table = class Table
-
   @getTableName = ->
     if !@tableName
       @tableName = @name.pluralize().camelToSnakeCase();
@@ -122,9 +121,11 @@ exports.Table = class Table
       model::[@name.toLowerCamelCase()] = (done) ->
         owner.findById @[foreignField], done
 
+  loaded: ->
+    @_loaded || {}
+
   constructor: (attributes) ->
     @[key] = value for key, value of attributes
-    @_loaded = {}
 
   loadRow: (attrs) ->
     # loaded are always in db case (snake), object attributes are in snakeCase
@@ -150,7 +151,7 @@ exports.Table = class Table
       for key, value of @ when @hasOwnProperty(key)
         # loaded are in db case (snake)
         dbKey = key.camelToSnakeCase()
-        lastValue = @_loaded[dbKey]
+        lastValue = @loaded()[dbKey]
         if cols[dbKey] && (lastValue == undefined || lastValue != value)
           changes[dbKey] = [lastValue, value]
           count++
