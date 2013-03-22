@@ -30,3 +30,8 @@ exports.Sync = class Sync
     @handlers = []
     @errors = null
 
+  subsync: ->
+    d = @doneCallback()
+    new Sync (res) ->
+      d(res)
+

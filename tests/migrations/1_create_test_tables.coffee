@@ -19,6 +19,12 @@ createSql = '''
     text TEXT
   );
 
+  drop table if exists test_data;
+  create table test_data(
+    id serial primary key,
+    text TEXT
+  );
+
   create index ix_comments on comments(commentable_id, commentable_type);
 '''
 

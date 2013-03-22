@@ -29,7 +29,6 @@ prego.rollback './tests/migrations', ->
       @hasMany Comment, {as: 'commentable'}
 
     Person.deleteAll sync.doneCallback (err) ->
-
       s2 = new prego.Sync
 
       x = new Person { firstName: 'John', lastName: 'Doe' }
@@ -55,7 +54,6 @@ prego.rollback './tests/migrations', ->
             console.log "\n\nSUM!", res.sum
             console.log "\n\n"
             tr.rollback
-
 
         Person.findById x.id, (err, y) ->
           assert.equal y.fullName(), "John Doe"
@@ -128,14 +126,21 @@ prego.rollback './tests/migrations', ->
                 doneEach()
 
 
+      # Connections test run in s2.wait too
+      class TestData extends prego.Table
+      s3 = sync.subsync()
+      for n in [0..50 ]
+        t = new TestData { text: "Test-f-#{n}" }
+        t.save s3.doneCallback (err) ->
+          assert.equal err, null
+      s3.doneCallback()('test')
+      s3.wait (err) ->
+        assert.equal err, 'test'
+        console.log "Conn test done #{err}"
 
-
-
-
-
-
-
-sync.wait ->
-  console.log 'All tests are passed'
-  process.exit 0
+sync.wait (err)->
+  console.log 'All tests are passed ' + (err || '')
+  setTimeout ->
+    process.exit 0
+  , 300
 

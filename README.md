@@ -160,7 +160,7 @@ Suppose you need some operations to work in parallel, and wait for all them to c
 easiest way to do it is to ise prego Sync class
 
     sync = prego.Sync (err) ->
-        console.log 'Everything is done', if err then "whith errors: #{errors}" else "with no errors"
+        console.log 'Everything is done', if err then "with errors: #{errors}" else "with no errors"
 
     profile.save sync.doneCallback()
     user.save sync.doneCallback()

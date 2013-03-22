@@ -1,6 +1,7 @@
 pg = require('pg')
 fs = require 'fs'
 path = require 'path'
+util = require 'util'
 
 require './string_utils'
 
@@ -20,9 +21,13 @@ statementName = (statement) ->
     name = "stmt_#{statementCounter++}"
     statementNames[statement] = name
 
+
+icount = 0
+
 class Connection
 
   constructor: (@connectionString) ->
+    @_lockCount = 0
 
   clone: ->
     return new @.constructor(@connectionString)
@@ -40,48 +45,85 @@ class Connection
       if !exports.connectionString
         throw Error('DB connection string is not found/not set')
 
-    pg.connect @connectionString, (err, client) =>
-      if err
-        console.log 'Unable to get PG client for', exports.connectionString
-        console.log ': ', err
-        callback err
-      else
-        @_client = client
-#        console.log 'Connection created:', exports.connectionString
-        callback null, client
+    if @_client?
+      console.log 'reuse cached client', @_id, @_lockCount
+      callback null, @_client
+    else
+      pg.connect @connectionString, (err, client, connDone) =>
+        if err
+          console.log 'Unable to get PG client for', exports.connectionString
+          console.log ': ', err
+          callback err
+        else
+          @_id = icount++
+          @_client = client
+          @_done = connDone
+          console.log 'Connection created:', @_id
+          callback null, client
+
+  free: ->
+    if @_lockCount < 1 && @_client
+      console.log 'Connection freed', @_id
+      @_done()
+      @_client = null
+      @_lockCount = 0
+
+  lock: ->
+    @_lockCount++
+
+  unlock: ->
+    if --@_lockCount < 1
+      console.log 'unlock FREE', @_id
+      @free()
+    else
+      console.log 'Unlock #', @_id, @_lockCount
+
+  lockedClient: (cb) ->
+    @client (err, cl) =>
+      @lock() unless err
+      cb(err, cl)
+
 
   pauseDrain: ->
-    @_client.pauseDrain()
+    console.warn "prego.Connection.pauseDrain is deprecated, use lock/unlock unstead"
+    @lock()
 
   resumeDrain: ->
-    @_client.resumeDrain()
+    console.warn "prego.Connection.resumeDrain is deprecated, use lock/unlock unstead"
+    @unlock()
 
   query: (statement, callback) ->
-    sqlLog? statement
-    @client (err, client) ->
+    sqlLog? @_id, statement
+    @lockedClient (err, client) =>
       return callback(err) if err
-      client.query statement, callback
+      client.query statement, (args...) =>
+        callback(args...)
+        @unlock()
 
   execute: (query, params, done) ->
     [done, params] = [ params, [] ] if !params
-    @client (err, client) ->
+    @lockedClient (err, client) =>
       return done?(err) if err
-      sqlLog? query, params, done?
-      client.query { name: statementName(query), text: query, values: params}, done
+      sqlLog? @_id, query, params, done?
+      client.query { name: statementName(query), text: query, values: params}, (args...) =>
+        done(args...)
+        @unlock()
 
   executeEach: (query, params, done) ->
     [done, params] = [ params, [] ] if !params
-    @client (err, client) ->
+    @lockedClient (err, client) =>
       return done(err) if err
-      sqlLog? query, params, done?
+      sqlLog? @_id, query, params, done?
 
       query = client.query { name: statementName(query), text: query, values: params}
       query.on 'row', (row, result) ->
         done null, row
       query.on 'error', (err) ->
         done err
-      query.on 'end', (result) ->
+        @unlock()
+      query.on 'end', (result) =>
         done null, null, result
+        @unlock()
 
   executeRow: (query, params, callback) ->
     @execute query, params, (err, rs) ->

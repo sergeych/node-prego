@@ -27,8 +27,8 @@ class Transaction
       @connection = db.db.clone()
 
     @open = true
+    @connection.lock()
     @connection.query 'BEGIN', @sync.doneCallback (err) =>
-      @connection.pauseDrain()
       return done(err) if err
       done null, @
 
@@ -61,7 +61,7 @@ class Transaction
   _cleanup: ->
     @open = false
     t._transaction = null for t in @tables
-    @connection.resumeDrain()
+    @connection.unlock()
 
   check: (callback) ->
     @sync.doneCallback (err, args...) =>
