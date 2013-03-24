@@ -12,6 +12,11 @@ exports.sqlLog = sqlLog = null
 exports.enableSqlLog = enableLog = (enable) ->
   sqlLog = exports.sqlLog = if enable then (args...) -> console.log('SQL:', args...) else null
 
+
+# Trace debug stuff for this only module
+#dtrace = console.log
+dtrace = null
+    
 statementCounter = 0
 statementNames = {}
 
@@ -23,6 +28,9 @@ statementName = (statement) ->
 
 
 icount = 0
+activeClients = {}
+closedClientsCount = 0
+
 
 class Connection
 
@@ -40,43 +48,48 @@ class Connection
       if fs.existsSync('./config.coffee') || fs.existsSync('./config.js')
         m = require path.resolve('./config')
         s = m.dbConnection || m.dbConnectionString
-        console.log 'Connection string detected:', s
+        dtrace? 'Connection string detected:', s
         @connectionString = exports.connectionString = s
       if !exports.connectionString
         throw Error('DB connection string is not found/not set')
 
     if @_client?
-      console.log 'reuse cached client', @_id, @_lockCount
+      dtrace? 'reuse cached client', @_id, @_lockCount
       callback null, @_client
     else
       pg.connect @connectionString, (err, client, connDone) =>
         if err
-          console.log 'Unable to get PG client for', exports.connectionString
-          console.log ': ', err
+          dtrace? 'Unable to get PG client for', exports.connectionString
+          dtrace? ': ', err
           callback err
         else
           @_id = icount++
+          activeClients[@_id]=1
           @_client = client
           @_done = connDone
-          console.log 'Connection created:', @_id
+          dtrace? 'Connection created:', @_id
           callback null, client
 
   free: ->
     if @_lockCount < 1 && @_client
-      console.log 'Connection freed', @_id
+      dtrace? 'Connection freed', @_id
       @_done()
       @_client = null
       @_lockCount = 0
+      delete activeClients[@_id]
 
   lock: ->
+    dtrace? 'Lock:', @_id, @_lockCount
     @_lockCount++
+    @
 
   unlock: ->
     if --@_lockCount < 1
-      console.log 'unlock FREE', @_id
+      dtrace? 'unlock FREE', @_id
       @free()
     else
-      console.log 'Unlock #', @_id, @_lockCount
+      dtrace? 'Unlock #', @_id, @_lockCount
+    @
 
   lockedClient: (cb) ->
     @client (err, cl) =>
@@ -93,8 +106,8 @@ class Connection
     @unlock()
 
   query: (statement, callback) ->
-    sqlLog? @_id, statement
     @lockedClient (err, client) =>
+      sqlLog? @_id, statement
       return callback(err) if err
       client.query statement, (args...) =>
         callback(args...)
@@ -131,6 +144,15 @@ class Connection
         callback? err
       else
         callback? null, if rs.rowCount == 1 then rs.rows[0] else null
+
+  @printStats = ->
+    console.log 'In use:', activeClients
+    console.log 'Closed:', closedClientsCount
+
+  @clientsInUse = ->
+    count = 0
+    count++ for _,_ of activeClients
+    count
 
 exports.db = new Connection()
 exports.Connection = Connection

@@ -9,7 +9,8 @@ tablesDone = sync.doneCallback()
 assocsDone = sync.doneCallback()
 polyAssocsDone = sync.doneCallback()
 
-prego.enableSqlLog true
+# Set to true to trace SQL statements
+prego.enableSqlLog false
 
 prego.setConnectionString("postgres://localhost:5432/prego_test")
 
@@ -53,7 +54,7 @@ prego.rollback './tests/migrations', ->
             assert.equal err, null
             console.log "\n\nSUM!", res.sum
             console.log "\n\n"
-            tr.rollback
+            tr.rollback()
 
         Person.findById x.id, (err, y) ->
           assert.equal y.fullName(), "John Doe"
@@ -141,6 +142,8 @@ prego.rollback './tests/migrations', ->
 sync.wait (err)->
   console.log 'All tests are passed ' + (err || '')
   setTimeout ->
+    prego.Connection.printStats()
+    assert.equal prego.Connection.clientsInUse(), 0, "All clients should be freed by now"
     process.exit 0
   , 300
 

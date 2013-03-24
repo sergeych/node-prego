@@ -12,18 +12,18 @@ class Transaction
   begin: (arg, done) ->
     @open = true
     if arg instanceof Table
-      console.log 'Transaction for table!'
+#      console.log 'Transaction for table!'
       @connection = arg.constructor.getConnection().clone()
       arg.constructor.connection = @connection
       arg._transaction = @
     else if arg instanceof db.Connection
-      console.log 'Transaction for connection!'
+#      console.log 'Transaction for connection!'
       @connection = arg
     else if arg?
-      console.log 'Transaction for connstr'
+#      console.log 'Transaction for connstr'
       @connection = new db.Connection(arg)
     else
-      console.log 'Cloning default'
+#      console.log 'Cloning default'
       @connection = db.db.clone()
 
     @open = true
@@ -54,8 +54,9 @@ class Transaction
   _rollback: (done) ->
     return unless @open
     @failed = true
-    @connection.query 'ROLLBACK', done
-    @_cleanup()
+    @connection.query 'ROLLBACK', =>
+      @_cleanup()
+      done?()
 
 
   _cleanup: ->
