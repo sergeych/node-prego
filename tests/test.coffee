@@ -147,3 +147,14 @@ sync.wait (err)->
     process.exit 0
   , 300
 
+connection = prego.db.clone()
+connection.lock()
+connection.execute 'BEGIN', (err) ->
+  if err
+    connection.unlock()
+    assert.ok err, null
+  else
+    # Do something with connection
+    connection.execute 'COMMIT', (err) ->
+      connection.unlock()
+      assert.equal err, null

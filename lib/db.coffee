@@ -114,7 +114,7 @@ class Connection
         @unlock()
 
   execute: (query, params, done) ->
-    [done, params] = [ params, [] ] if !params
+    [done, params] = [ params, [] ] if !done
     @lockedClient (err, client) =>
       return done?(err) if err
       sqlLog? @_id, query, params, done?
