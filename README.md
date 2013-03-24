@@ -14,7 +14,7 @@ Main prego features:
 * reversible migrations, plain postgres SQL + any js/coffee code, executed in transactions, convenient to deploy
 
 * DB access helper functions like prego.client(), prego.execute(), prego.executeRow() with automatic SQL statement
-  preparation and caching, and pg's connection pool (new style). Provides connection looking and automated release.
+  preparation and caching, and pg's connection pool (new style). Provides connection locking and automated release.
 
 * Models: use prego.Table as base class to get automated loading from SQL or by id, access to attributes as camelCased
   properties `user.lastName`, save only changed attributes, minimal associations (hasMany), easy deletion and so on.
