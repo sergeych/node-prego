@@ -50,6 +50,8 @@ class Connection
         s = m.dbConnection || m.dbConnectionString
         dtrace? 'Connection string detected:', s
         @connectionString = exports.connectionString = s
+      else if process.env.DB_URL
+        @connectionString = exports.connectionString = process.env.DB_URL
       if !exports.connectionString
         throw Error('DB connection string is not found/not set')
 
